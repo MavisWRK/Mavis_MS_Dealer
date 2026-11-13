@@ -1,6 +1,6 @@
 const { PermissionsBitField, ApplicationCommandOptionType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 const { Database } = require("st.db");
-const ytsr = require("@distube/ytsr");
+const ytsr = require("../../structures/searchYouTube");
 
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 

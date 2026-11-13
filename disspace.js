@@ -3,9 +3,9 @@ const { DisTube } = require('distube');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
 const { SpotifyPlugin } = require('@distube/spotify');
 const { DeezerPlugin } = require('@distube/deezer');
-const { YouTubePlugin } = require('@distube/youtube');
+const ResilientYouTubePlugin = require('./structures/ResilientYouTubePlugin');
 const { DirectLinkPlugin } = require('@distube/direct-link');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
+const ModernYtDlpPlugin = require('./structures/ModernYtDlpPlugin');
 const { AppleMusicPlugin } = require('distube-apple-music');
 const { TidalPlugin } = require('distube-tidal');
 
@@ -34,6 +34,7 @@ class MainClient extends Client {
 
     const client = this;
 
+    const ytDlpPlugin = new ModernYtDlpPlugin();
     this.distube = new DisTube(client, {
         savePreviousSongs: true,
         emitAddListWhenCreatingQueue: true,
@@ -42,11 +43,11 @@ class MainClient extends Client {
             new TidalPlugin(),
             new AppleMusicPlugin(),
             new DirectLinkPlugin(),
-            new YouTubePlugin(),
+            new ResilientYouTubePlugin(ytDlpPlugin),
             new SoundCloudPlugin(),
             new DeezerPlugin(),
             checkSpotify(client),
-            new YtDlpPlugin()
+            ytDlpPlugin
         ],
     });
 

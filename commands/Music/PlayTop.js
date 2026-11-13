@@ -1,6 +1,7 @@
 const { PermissionsBitField, ApplicationCommandOptionType } = require("discord.js");
 const { Database } = require("st.db");
 const reportPlaybackError = require("../../structures/reportPlaybackError");
+const resolvePlayQuery = require("../../structures/resolvePlayQuery");
 
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 
@@ -34,7 +35,7 @@ module.exports = {
                 if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionsBitField.Flags.Speak)) return interaction.editReply(`I don't have perm \`SPEAK\` in ${channel.name} to join voice!`);
 
                 try {
-                    const string = interaction.options.getString("search");
+                    const string = await resolvePlayQuery(interaction.options.getString("search"));
 
                     const options = {
                         member: interaction.member,

@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const { Database } = require("st.db");
-const ytsr = require("@distube/ytsr");
+const ytsr = require("../../structures/searchYouTube");
 
 const SStats = new Database("./settings/models/chart.json", { databaseInObject: true });
 
@@ -28,7 +28,7 @@ module.exports = {
         for (let i = 0; i < all.length; i++) {
             const format = `https://youtu.be/${all[i].ID}`;
             const search = await ytsr(format, { limit: 1 });
-            const track = search.items[0]; 
+            const track = search.items[0];
 
             TopChart.push(
                 `**${i + 1}.** [${track.name}](${track.url}) | **Playable:** \`${all[i].data}\`

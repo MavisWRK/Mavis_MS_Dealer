@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { Database } = require("st.db");
 const delay = require("delay");
+const resolvePlayQuery = require("../../structures/resolvePlayQuery");
 
 const db = new Database("./settings/models/setup.json", { databaseInObject: true });
 
@@ -314,7 +315,7 @@ client.on("messageCreate", async (message) => {
             message,
         }
 
-        await client.distube.play(message.member.voice.channel, song, options);
+        await client.distube.play(message.member.voice.channel, await resolvePlayQuery(song), options);
         await UpdateQueue(client, message);
 
     });
