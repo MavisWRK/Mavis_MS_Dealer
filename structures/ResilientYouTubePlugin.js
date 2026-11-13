@@ -27,11 +27,11 @@ class ResilientYouTubePlugin extends YouTubePlugin {
     try {
       return await super.getStreamURL(song);
     } catch (youtubeError) {
-      console.warn("[YouTube] Native extraction failed; trying yt-dlp:", youtubeError);
+      console.warn(`[YouTube] Trying yt-dlp: ${youtubeError.message}`);
       try {
         return await this.ytDlpPlugin.getStreamURL(song);
       } catch (ytDlpError) {
-        console.error("[YouTube] yt-dlp fallback failed:", ytDlpError);
+        console.error(`[YouTube] yt-dlp failed: ${ytDlpError.message}`);
         throw ytDlpError;
       }
     }

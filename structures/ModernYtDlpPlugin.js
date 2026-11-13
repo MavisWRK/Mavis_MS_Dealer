@@ -32,7 +32,11 @@ function makeSong(plugin, info, options) {
 
 class ModernYtDlpPlugin extends YtDlpPlugin {
   async resolve(url, options) {
-    const info = await json(url, flags);
+    const isPlaylist = /(?:[?&]list=|\/playlist\?)/i.test(url);
+    const info = await json(url, {
+      ...flags,
+      ...(isPlaylist ? { flatPlaylist: true, playlistItems: "1:100" } : {}),
+    });
     if (!Array.isArray(info.entries)) return makeSong(this, info, options);
     const songs = info.entries.filter(Boolean).map((entry) => makeSong(this, entry, options));
     if (!songs.length) throw new DisTubeError("YTDLP_ERROR", "The playlist is empty");

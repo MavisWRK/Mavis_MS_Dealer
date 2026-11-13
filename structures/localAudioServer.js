@@ -1,6 +1,5 @@
 const http = require("http");
 const path = require("path");
-const fs = require("fs");
 const { spawn } = require("child_process");
 const { randomUUID } = require("crypto");
 const playbackLog = require("./playbackLog");
@@ -23,26 +22,19 @@ function serve(request, response) {
     return;
   }
 
-  const ffmpeg = path.resolve(
-    __dirname,
-    "..",
-    process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg",
-  );
   const args = [
     "--no-warnings",
     "--no-progress",
     "--no-playlist",
     "--force-ipv4",
     "--downloader",
-    "ffmpeg",
+    "native",
+    ...(process.platform === "win32" ? ["--impersonate", "Chrome-151:Windows-10"] : []),
     "--format",
     "ba",
-    "--download-sections",
-    "*0-",
     "--output",
     "-",
   ];
-  if (fs.existsSync(ffmpeg)) args.push("--ffmpeg-location", ffmpeg);
   args.push(source.url);
 
   const child = spawn(ytDlpBinary(), args, { windowsHide: true });

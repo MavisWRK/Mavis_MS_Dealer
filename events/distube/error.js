@@ -5,7 +5,7 @@ module.exports = async (client, error, queue, song) => {
   releaseSongAudio(song);
   playbackLog(
     "DisTube",
-    `Error in guild ${queue?.id || "unknown"}, song ${song?.id || "unknown"}, queue length ${queue?.songs?.length ?? "unknown"}: ${error.stack || error}`,
+    `Playback failed in guild ${queue?.id || "unknown"}, song ${song?.id || "unknown"}: ${error.message || error}`,
   );
   if (queue?.textChannel) {
     await queue.textChannel

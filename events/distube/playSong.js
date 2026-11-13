@@ -4,9 +4,7 @@ const { Database } = require("st.db");
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 
 module.exports = async (client, queue, track) => {
-  console.log(
-    `[music] Started ${track.id} in guild ${queue.id}; queue length ${queue.songs.length}`,
-  );
+  console.log(`[music] Playing: ${track.name}`);
 
   await client.UpdateQueueMsg(queue);
   await client.addChart(track.id);
