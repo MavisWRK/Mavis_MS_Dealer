@@ -43,11 +43,15 @@ module.exports = {
 
                     await client.distube.play(interaction.member.voice.channel, string, options);
                 } catch (e) {
-                    //
+                    console.error('[play] Playback failed:', e);
+                    await interaction.editReply(`Could not play this track: ${e.message || 'unknown error'}`).catch(console.error);
                 }
             }
         } catch (e) {
-            //
+            console.error('[play] Command failed:', e);
+            const reply = `Could not start playback: ${e.message || 'unknown error'}`;
+            if (interaction.replied || interaction.deferred) await interaction.editReply(reply).catch(console.error);
+            else await interaction.reply(reply).catch(console.error);
         }
     }
 }

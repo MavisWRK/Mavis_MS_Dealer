@@ -9,11 +9,11 @@ module.exports = async (client, queue, song) => {
     if (db.setup_enable === true) return;
 
     const data = await GMessage.get(queue.textChannel.guild.id);
-    const msg = await queue.textChannel.messages.cache.get(data.message_id);
+    const msg = data?.message_id && await queue.textChannel.messages.fetch(data.message_id).catch(() => null);
 
     const embed = new EmbedBuilder()
         .setDescription(`**Queued • [${song.name || "Anonymous"}](${song.url || "https://www.github.com/Adivise"})** \`${song.formattedDuration}\` • ${song.user}`)
         .setColor('#000001')
 
-    await msg.edit({ content: " ", embeds: [embed] })
+    if (msg) await msg.edit({ content: " ", embeds: [embed] })
 }

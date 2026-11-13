@@ -7,7 +7,7 @@ const { red } = require('chalk');
 const BStats = new Database("./settings/models/stats.json", { databaseInObject: true });
 
 module.exports = async(client, interaction) => {
-    if (interaction.isCommand || interaction.isContextMenuCommand || interaction.isModalSubmit || interaction.isChatInputCommand) {
+    if (interaction.isChatInputCommand() || interaction.isContextMenuCommand() || interaction.isAutocomplete()) {
         if (!interaction.guild || interaction.user.bot) return;
 
         await client.createExSetup(interaction);
@@ -56,12 +56,14 @@ module.exports = async(client, interaction) => {
     if (!command) return;
     if (command) {
         try {
-            client.addCount(command.name.at(-1));
-            command.run(client, interaction);
-            console.log(`[COMMAND] ${command.name.at(-1)} executed by ${interaction.user.tag} | [${client.user.tag}] in ${interaction.guild.name} (${interaction.guild.id}) | Total Used: ${BStats.all().find((i) => i.ID === command.name.at(-1)).data} times.`);
+            await client.addCount(command.name.at(-1));
+            await command.run(client, interaction);
+            const count = BStats.all().find((i) => i.ID === command.name.at(-1))?.data ?? 0;
+            console.log(`[COMMAND] ${command.name.at(-1)} executed by ${interaction.user.tag} | [${client.user.tag}] in ${interaction.guild.name} (${interaction.guild.id}) | Total Used: ${count} times.`);
         } catch (error) {
             console.log(error);
-            await interaction.reply({ content: `Something went wrong!`, ephmeral: true });
+            if (interaction.replied || interaction.deferred) await interaction.followUp({ content: `Something went wrong!`, ephemeral: true }).catch(console.error);
+            else await interaction.reply({ content: `Something went wrong!`, ephemeral: true }).catch(console.error);
         }}
     }
 }

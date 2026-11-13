@@ -1,5 +1,6 @@
 const { PermissionsBitField, ApplicationCommandType } = require('discord.js');
 const { Database } = require("st.db");
+const reportPlaybackError = require("../../structures/reportPlaybackError");
 
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 
@@ -35,7 +36,7 @@ module.exports = {
 
             await client.distube.play(interaction.member.voice.channel, string, options);
         } catch (e) {
-            //
+            await reportPlaybackError(interaction, e);
         }
     }
 }

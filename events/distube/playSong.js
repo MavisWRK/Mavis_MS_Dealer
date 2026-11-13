@@ -27,6 +27,10 @@ module.exports = async (client, queue, track) => {
   collector.on('collect', async (message) => {
     const id = message.customId;
     const queue = client.distube.getQueue(message.guild.id);
+    if (!queue) {
+      collector.stop();
+      return message.reply({ content: "There is nothing in the queue right now.", ephemeral: true });
+    }
     if (id === "pause") {
       if (!queue) {
         collector.stop();
@@ -160,8 +164,7 @@ module.exports = async (client, queue, track) => {
       if (!queue) {
         collector.stop();
       }
-      const pagesNum = Math.ceil(queue.songs.length / 10);
-      if(pagesNum === 0) pagesNum = 1;
+      const pagesNum = Math.max(1, Math.ceil(queue.songs.length / 10));
   
       const songStrings = [];
       for (let i = 1; i < queue.songs.length; i++) {
@@ -202,7 +205,7 @@ function disspace(nowQueue, nowTrack, client) {
     .setThumbnail(nowTrack.thumbnail || client.user.displayAvatarURL())
     .setColor('#000001')
     .setDescription(`**[${nowTrack.name}](${nowTrack.url})**`)
-    .addFields({ name: `Uploader:`, value: `**[${nowTrack.uploader.name || "Anonymous"}](${nowTrack.uploader.url || "https://www.github.com/Adivise"})**`, inline: true })
+    .addFields({ name: `Uploader:`, value: nowTrack.uploader?.url ? `**[${nowTrack.uploader.name || "Anonymous"}](${nowTrack.uploader.url})**` : `**${nowTrack.uploader?.name || "Anonymous"}**`, inline: true })
     .addFields({ name: `Requester:`, value: `${nowTrack.user}`, inline: true })
     .addFields({ name: `Current Volume:`, value: `${nowQueue.volume}%`, inline: true })
     .addFields({ name: `Filters:`, value: `${nowQueue.filters.names.join(", ") || "Normal"}`, inline: true })

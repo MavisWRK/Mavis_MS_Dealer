@@ -41,12 +41,12 @@ class MainClient extends Client {
         plugins: [
             new TidalPlugin(),
             new AppleMusicPlugin(),
-            new YtDlpPlugin({ update: false }),
             new DirectLinkPlugin(),
             new YouTubePlugin(),
             new SoundCloudPlugin(),
             new DeezerPlugin(),
-            checkSpotify(client)
+            checkSpotify(client),
+            new YtDlpPlugin()
         ],
     });
 

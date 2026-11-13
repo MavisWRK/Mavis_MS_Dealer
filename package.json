@@ -1,14 +1,19 @@
 {
-  "name": "disspacex",
+  "name": "mavis-ms-dealer",
   "version": "6.3.0",
-  "description": "✈ Join Discord: https://discord.gg/SNG3dh3MbR",
+  "description": "Discord music bot maintained by MavisWRK",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "author": "Adivise",
+  "author": "MavisWRK (based on DisSpaceX by Adivise)",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "dependencies": {
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.19.0",
     "@distube/deezer": "^2.0.1",
     "@distube/direct-link": "^1.0.1",
     "@distube/soundcloud": "^2.0.4",
@@ -16,22 +21,19 @@
     "@distube/youtube": "^1.0.4",
     "@distube/yt-dlp": "^2.0.1",
     "@distube/ytsr": "^2.0.4",
+    "@snazzah/davey": "^0.1.6",
     "chalk": "^4.1.2",
     "chillout": "^5.0.0",
     "delay": "^5.0.0",
-    "discord.js": "^14.16.3",
-    "distube": "^5.0.4",
+    "discord.js": "^14.22.1",
+    "distube": "^5.0.7",
     "distube-apple-music": "^0.1.0",
     "distube-tidal": "^0.1.0",
     "dotenv": "^16.4.5",
-    "figlet": "^1.8.0",
     "libsodium-wrappers": "^0.7.15",
     "lyrics-finder": "^21.7.0",
     "opusscript": "^0.0.8",
-    "path": "^0.12.7",
-    "plsargs": "^0.1.6",
     "recursive-readdir": "^2.2.3",
-    "st.db": "^5.1.4",
-    "stuffs": "^0.1.42"
+    "st.db": "^5.1.4"
   }
 }

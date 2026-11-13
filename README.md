@@ -37,7 +37,7 @@
 
 ## 🛑 Requirements
 
-Node.js **[Download](https://nodejs.org/dist/v17.0.1/node-v17.0.1-x64.msi)**
+Node.js 22.12 or newer is required by the current voice dependencies.
 
 FFmpeg **[Download!!](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip)**
 
@@ -46,9 +46,9 @@ Discord Bot Token **[Guide](https://discordjs.guide/preparations/setting-up-a-bo
 ## 💌 Installation
 
 ```
-git clone https://github.com/Adivise/DisSpaceX
-cd DisSpaceX
-npm install
+git clone https://github.com/MavisWRK/Mavis_MS_Dealer.git
+cd Mavis_MS_Dealer
+npm ci
 ```
 After installation finishes please drag **ffmpeg.exe** file into DisSpaceX folder and you can use `node .` to start the bot. or `Run Start.bat`
 

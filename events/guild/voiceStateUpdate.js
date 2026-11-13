@@ -13,7 +13,7 @@ module.exports = async (client, oldState, newState) => {
 	}
 
 	if (newState.channelId && newState.channel.type == 13 && newState.guild.members.me.voice.suppress) {
-		if (newState.guild.members.me.permissions.has(PermissionsBitField.Flags.Speak) || (newState.channel && newState.channel.permissionsFor(nS.guild.members.me).has(PermissionsBitField.Flags.Speak))) {
+		if (newState.guild.members.me.permissions.has(PermissionsBitField.Flags.Speak) || (newState.channel && newState.channel.permissionsFor(newState.guild.members.me).has(PermissionsBitField.Flags.Speak))) {
 			newState.guild.members.me.voice.setSuppressed(false);
 		}
 	}
