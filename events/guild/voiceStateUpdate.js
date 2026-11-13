@@ -7,19 +7,20 @@ const GVoice = new Database("./settings/models/voice.json", { databaseInObject: 
 module.exports = async (client, oldState, newState) => {
 	const queue = client.distube.getQueue(newState.guild.id);
 	if (!queue) return;
-	if (!newState.guild.members.cache.get(client.user.id).voice.channelId) {
-		await client.distube.voices.leave(queue.textChannel.guild);
-		await client.UpdateMusic(queue);
-	}
-
-	if (newState.channelId && newState.channel.type == 13 && newState.guild.members.me.voice.suppress) {
-		if (newState.guild.members.me.permissions.has(PermissionsBitField.Flags.Speak) || (newState.channel && newState.channel.permissionsFor(newState.guild.members.me).has(PermissionsBitField.Flags.Speak))) {
-			newState.guild.members.me.voice.setSuppressed(false);
+	if (newState.id === client.user.id) {
+		if (!newState.channelId) {
+			console.warn(`[voice] Bot left ${newState.guild.id}; clearing queue`);
+			await client.distube.voices.leave(newState.guild);
+			await client.UpdateMusic(queue);
+		} else if (newState.channel?.type === 13 && newState.suppress) {
+			const me = newState.guild.members.me;
+			if (me && newState.channel.permissionsFor(me)?.has(PermissionsBitField.Flags.Speak)) {
+				await me.voice.setSuppressed(false);
+			}
 		}
+		return;
 	}
-
-	if (oldState.id === client.user.id) return;
-	if (!oldState.guild.members.cache.get(client.user.id).voice.channelId) return;
+	if (!newState.guild.members.me?.voice.channelId) return;
 
 	const db = await GVoice.get(queue.textChannel.guild.id);
 	if (db.voice_enable) return;

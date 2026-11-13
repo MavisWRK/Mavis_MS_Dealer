@@ -4,6 +4,7 @@ const { Database } = require("st.db");
 const GVoice = new Database("./settings/models/voice.json", { databaseInObject: true });
 
 module.exports = async (client, queue) => {
+    console.log(`[music] Queue finished in guild ${queue.id}`);
     const db = await GVoice.get(queue.textChannel.guild.id);
 
     if (db.voice_enable === true) {
