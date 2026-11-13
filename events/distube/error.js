@@ -1,6 +1,8 @@
 const playbackLog = require("../../structures/playbackLog");
+const releaseSongAudio = require("../../structures/releaseSongAudio");
 
 module.exports = async (client, error, queue, song) => {
+  releaseSongAudio(song);
   playbackLog(
     "DisTube",
     `Error in guild ${queue?.id || "unknown"}, song ${song?.id || "unknown"}, queue length ${queue?.songs?.length ?? "unknown"}: ${error.stack || error}`,

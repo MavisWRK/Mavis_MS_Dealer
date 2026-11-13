@@ -1,5 +1,6 @@
 const { Song, Playlist, DisTubeError } = require("distube");
 const { YtDlpPlugin, json } = require("@distube/yt-dlp");
+const localAudioServer = require("./localAudioServer");
 
 const flags = {
   dumpSingleJson: true,
@@ -50,6 +51,16 @@ class ModernYtDlpPlugin extends YtDlpPlugin {
 
   async getStreamURL(song) {
     if (!song.url) throw new DisTubeError("YTDLP_PLUGIN_INVALID_SONG", "Missing song URL");
+    if (/^https?:\/\/(?:www\.|m\.|music\.)?(?:youtube\.com|youtu\.be)\//i.test(song.url)) {
+      if (song.isLive) {
+        const info = await json(song.url, { ...flags, format: "ba/ba*" });
+        if (info.protocol?.startsWith("m3u8") && info.url) return info.url;
+        throw new DisTubeError("YTDLP_ERROR", "This live stream has no playable HLS audio");
+      }
+      const local = await localAudioServer.registerStream(song.url);
+      song.localAudioKey = local.key;
+      return local.url;
+    }
     const info = await json(song.url, { ...flags, format: "ba/ba*" });
     if (Array.isArray(info.entries) || !info.url) {
       throw new DisTubeError("YTDLP_ERROR", "No playable stream URL");
