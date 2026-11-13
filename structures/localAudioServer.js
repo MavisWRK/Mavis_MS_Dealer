@@ -22,56 +22,65 @@ function serve(request, response) {
     return;
   }
 
-  const args = [
-    "--no-warnings",
-    "--no-progress",
-    "--no-playlist",
-    "--force-ipv4",
-    "--downloader",
-    "native",
-    ...(process.platform === "win32" ? ["--impersonate", "Chrome-151:Windows-10"] : []),
-    "--format",
-    "ba",
-    "--output",
-    "-",
-  ];
-  args.push(source.url);
-
-  const child = spawn(ytDlpBinary(), args, { windowsHide: true });
-  source.children.add(child);
-  let started = false;
+  let activeChild;
   let cancelled = false;
-  let errorOutput = "";
-  child.stderr.on("data", (chunk) => {
-    errorOutput = (errorOutput + chunk.toString()).slice(-2000);
-  });
-  child.stdout.once("data", (chunk) => {
-    started = true;
-    response.writeHead(200, {
-      "Content-Type": "application/octet-stream",
-      "Cache-Control": "no-store",
-    });
-    response.write(chunk);
-    child.stdout.pipe(response);
-  });
-  child.once("error", (error) => {
-    playbackLog("yt-dlp", error.message);
-    if (!response.headersSent) response.writeHead(502);
-    response.end();
-  });
-  child.once("close", (code) => {
-    source.children.delete(child);
-    if (!cancelled && code !== 0)
-      playbackLog("yt-dlp", `Streaming failed (${code}): ${errorOutput}`);
-    if (!started && !response.headersSent) response.writeHead(502);
-    response.end();
-  });
   response.once("close", () => {
-    if (!child.killed && child.exitCode === null) {
+    if (activeChild && !activeChild.killed && activeChild.exitCode === null) {
       cancelled = true;
-      child.kill();
+      activeChild.kill();
     }
   });
+
+  const startAttempt = (useEmbeddedClient) => {
+    const args = [
+      "--no-warnings",
+      "--no-progress",
+      "--no-playlist",
+      "--force-ipv4",
+      "--downloader",
+      "native",
+      ...(process.platform === "win32" ? ["--impersonate", "Chrome-151:Windows-10"] : []),
+      ...(useEmbeddedClient ? ["--extractor-args", "youtube:player_client=web_embedded"] : []),
+      "--format",
+      "ba",
+      "--output",
+      "-",
+      source.url,
+    ];
+    const child = spawn(ytDlpBinary(), args, { windowsHide: true });
+    activeChild = child;
+    source.children.add(child);
+    let started = false;
+    let errorOutput = "";
+    child.stderr.on("data", (chunk) => {
+      errorOutput = (errorOutput + chunk.toString()).slice(-2000);
+    });
+    child.stdout.once("data", (chunk) => {
+      started = true;
+      response.writeHead(200, {
+        "Content-Type": "application/octet-stream",
+        "Cache-Control": "no-store",
+      });
+      response.write(chunk);
+      child.stdout.pipe(response);
+    });
+    child.once("error", (error) => {
+      errorOutput = error.message;
+    });
+    child.once("close", (code) => {
+      source.children.delete(child);
+      if (cancelled || response.destroyed) return;
+      if (!started && !useEmbeddedClient) {
+        startAttempt(true);
+        return;
+      }
+      if (code !== 0) playbackLog("yt-dlp", `Streaming failed (${code}): ${errorOutput}`);
+      if (!started && !response.headersSent) response.writeHead(502);
+      response.end();
+    });
+  };
+
+  startAttempt(false);
 }
 
 async function startServer() {
