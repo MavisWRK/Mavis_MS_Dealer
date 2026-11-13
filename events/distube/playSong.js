@@ -4,33 +4,42 @@ const { Database } = require("st.db");
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 
 module.exports = async (client, queue, track) => {
-  console.log(`[music] Started ${track.id} in guild ${queue.id}; queue length ${queue.songs.length}`);
-  
+  console.log(
+    `[music] Started ${track.id} in guild ${queue.id}; queue length ${queue.songs.length}`,
+  );
+
   await client.UpdateQueueMsg(queue);
   await client.addChart(track.id);
 
   const db = await GSetup.get(queue.textChannel.guild.id);
   if (db.setup_enable === true) return;
 
-  var newQueue = client.distube.getQueue(queue.id)
-  var data = disspace(newQueue, track ,client)
+  var newQueue = client.distube.getQueue(queue.id);
+  var data = disspace(newQueue, track, client);
 
-  const nowplay = await queue.textChannel.send(data)
+  const nowplay = await queue.textChannel.send(data);
 
   const filter = (message) => {
-    if (message.guild.members.me.voice.channel && message.guild.members.me.voice.channelId === message.member.voice.channelId) return true;
+    if (
+      message.guild.members.me.voice.channel &&
+      message.guild.members.me.voice.channelId === message.member.voice.channelId
+    )
+      return true;
     else {
       message.reply({ content: "You need to be in a same/voice channel.", ephemeral: true });
     }
   };
   const collector = nowplay.createMessageComponentCollector({ filter, time: 120000 });
 
-  collector.on('collect', async (message) => {
+  collector.on("collect", async (message) => {
     const id = message.customId;
     const queue = client.distube.getQueue(message.guild.id);
     if (!queue) {
       collector.stop();
-      return message.reply({ content: "There is nothing in the queue right now.", ephemeral: true });
+      return message.reply({
+        content: "There is nothing in the queue right now.",
+        ephemeral: true,
+      });
     }
     if (id === "pause") {
       if (!queue) {
@@ -58,17 +67,17 @@ module.exports = async (client, queue, track) => {
       if (queue.songs.length === 1 && queue.autoplay === false) {
         const embed = new EmbedBuilder()
           .setColor("#000001")
-          .setDescription("\`🚨\` | **There are no** `Songs` **in queue**")
+          .setDescription("\`🚨\` | **There are no** `Songs` **in queue**");
 
         message.reply({ embeds: [embed], ephemeral: true });
       } else {
-        await client.distube.skip(message)
-            const embed = new EmbedBuilder()
-              .setColor("#000001")
-              .setDescription("\`⏭\` | **Song has been:** `Skipped`")
+        await client.distube.skip(message);
+        const embed = new EmbedBuilder()
+          .setColor("#000001")
+          .setDescription("\`⏭\` | **Song has been:** `Skipped`");
 
-            nowplay.edit({ components: [] });
-            message.reply({ embeds: [embed], ephemeral: true });
+        nowplay.edit({ components: [] });
+        message.reply({ embeds: [embed], ephemeral: true });
       }
     } else if (id === "stop") {
       if (!queue) {
@@ -77,7 +86,7 @@ module.exports = async (client, queue, track) => {
       await client.distube.voices.leave(message.guild);
       const embed = new EmbedBuilder()
         .setDescription(`\`🚫\` | **Song has been:** | \`Stopped\``)
-        .setColor('#000001');
+        .setColor("#000001");
 
       await nowplay.edit({ components: [] });
       message.reply({ embeds: [embed], ephemeral: true });
@@ -89,14 +98,14 @@ module.exports = async (client, queue, track) => {
         client.distube.setRepeatMode(message.guild.id, 1);
         const embed = new EmbedBuilder()
           .setColor("#000001")
-          .setDescription(`\`🔁\` | **Song is loop:** \`Current\``)
+          .setDescription(`\`🔁\` | **Song is loop:** \`Current\``);
 
         message.reply({ embeds: [embed], ephemeral: true });
       } else {
         client.distube.setRepeatMode(message.guild.id, 0);
         const embed = new EmbedBuilder()
           .setColor("#000001")
-          .setDescription(`\`🔁\` | **Song is unloop:** \`Current\``)
+          .setDescription(`\`🔁\` | **Song is unloop:** \`Current\``);
 
         message.reply({ embeds: [embed], ephemeral: true });
       }
@@ -107,14 +116,14 @@ module.exports = async (client, queue, track) => {
       if (queue.previousSongs.length == 0) {
         const embed = new EmbedBuilder()
           .setColor("#000001")
-          .setDescription("\`🚨\` | **There are no** `Previous` **songs**")
+          .setDescription("\`🚨\` | **There are no** `Previous` **songs**");
 
         message.reply({ embeds: [embed], ephemeral: true });
       } else {
-        await client.distube.previous(message)
+        await client.distube.previous(message);
         const embed = new EmbedBuilder()
           .setColor("#000001")
-          .setDescription("\`⏮\` | **Song has been:** `Previous`")
+          .setDescription("\`⏮\` | **Song has been:** `Previous`");
 
         await nowplay.edit({ components: [] });
         message.reply({ embeds: [embed], ephemeral: true });
@@ -125,8 +134,8 @@ module.exports = async (client, queue, track) => {
       }
       await client.distube.shuffle(message);
       const embed = new EmbedBuilder()
-          .setColor(client.color)
-          .setDescription(`\`🔀\` | **Song has been:** \`Shuffle\``);
+        .setColor(client.color)
+        .setDescription(`\`🔀\` | **Song has been:** \`Shuffle\``);
 
       message.reply({ embeds: [embed], ephemeral: true });
     } else if (id === "voldown") {
@@ -135,8 +144,8 @@ module.exports = async (client, queue, track) => {
       }
       await client.distube.setVolume(message, queue.volume - 5);
       const embed = new EmbedBuilder()
-          .setColor(client.color)
-          .setDescription(`\`🔊\` | **Decrease volume to:** \`${queue.volume}\`%`)
+        .setColor(client.color)
+        .setDescription(`\`🔊\` | **Decrease volume to:** \`${queue.volume}\`%`);
 
       message.reply({ embeds: [embed], ephemeral: true });
     } else if (id === "clear") {
@@ -145,10 +154,10 @@ module.exports = async (client, queue, track) => {
       }
       await queue.songs.splice(1, queue.songs.length);
       await client.UpdateQueueMsg(queue);
-      
+
       const embed = new EmbedBuilder()
-          .setDescription(`\`📛\` | **Queue has been:** \`Cleared\``)
-          .setColor(client.color);
+        .setDescription(`\`📛\` | **Queue has been:** \`Cleared\``)
+        .setColor(client.color);
 
       message.reply({ embeds: [embed], ephemeral: true });
     } else if (id === "volup") {
@@ -157,8 +166,8 @@ module.exports = async (client, queue, track) => {
       }
       await client.distube.setVolume(message, queue.volume + 5);
       const embed = new EmbedBuilder()
-          .setColor(client.color)
-          .setDescription(`\`🔊\` | **Increase volume to:** \`${queue.volume}\`%`)
+        .setColor(client.color)
+        .setDescription(`\`🔊\` | **Increase volume to:** \`${queue.volume}\`%`);
 
       message.reply({ embeds: [embed], ephemeral: true });
     } else if (id === "queue") {
@@ -166,54 +175,81 @@ module.exports = async (client, queue, track) => {
         collector.stop();
       }
       const pagesNum = Math.max(1, Math.ceil(queue.songs.length / 10));
-  
+
       const songStrings = [];
       for (let i = 1; i < queue.songs.length; i++) {
         const song = queue.songs[i];
         songStrings.push(
           `**${i}.** [${song.name}](${song.url}) \`[${song.formattedDuration}]\` • ${song.user}
-          `);
-      };
+          `,
+        );
+      }
 
       const pages = [];
       for (let i = 0; i < pagesNum; i++) {
-        const str = songStrings.slice(i * 10, i * 10 + 10).join('');
+        const str = songStrings.slice(i * 10, i * 10 + 10).join("");
         const embed = new EmbedBuilder()
-          .setAuthor({ name: `Queue - ${message.guild.name}`, iconURL: message.guild.iconURL({ dynamic: true })})
+          .setAuthor({
+            name: `Queue - ${message.guild.name}`,
+            iconURL: message.guild.iconURL({ dynamic: true }),
+          })
           .setThumbnail(queue.songs[0].thumbnail || client.user.displayAvatarURL())
           .setColor(client.color)
-          .setDescription(`**Currently Playing:**\n**[${queue.songs[0].name}](${queue.songs[0].url})** \`[${queue.songs[0].formattedDuration}]\` • ${queue.songs[0].user}\n\n**Rest of queue**${str == '' ? '  Nothing' : '\n' + str }`)
-          .setFooter({ text: `Page • ${i + 1}/${pagesNum} | ${queue.songs.length} • Songs | ${queue.formattedDuration} • Total duration`});
-        
+          .setDescription(
+            `**Currently Playing:**\n**[${queue.songs[0].name}](${queue.songs[0].url})** \`[${queue.songs[0].formattedDuration}]\` • ${queue.songs[0].user}\n\n**Rest of queue**${str == "" ? "  Nothing" : "\n" + str}`,
+          )
+          .setFooter({
+            text: `Page • ${i + 1}/${pagesNum} | ${queue.songs.length} • Songs | ${queue.formattedDuration} • Total duration`,
+          });
+
         pages.push(embed);
-      };
+      }
 
       message.reply({ embeds: [pages[0]], ephemeral: true });
     }
-
-
   });
-  collector.on('end', async (collected, reason) => {
+  collector.on("end", async (collected, reason) => {
     if (reason === "time") {
       nowplay.edit({ components: [] });
     }
   });
-}
+};
 
 function disspace(nowQueue, nowTrack, client) {
   const embed = new EmbedBuilder()
-    .setAuthor({ name: `Starting Playing...`, iconURL: 'https://cdn.discordapp.com/emojis/741605543046807626.gif' })
+    .setAuthor({
+      name: `Starting Playing...`,
+      iconURL: "https://cdn.discordapp.com/emojis/741605543046807626.gif",
+    })
     .setThumbnail(nowTrack.thumbnail || client.user.displayAvatarURL())
-    .setColor('#000001')
+    .setColor("#000001")
     .setDescription(`**[${nowTrack.name}](${nowTrack.url})**`)
-    .addFields({ name: `Uploader:`, value: nowTrack.uploader?.url ? `**[${nowTrack.uploader.name || "Anonymous"}](${nowTrack.uploader.url})**` : `**${nowTrack.uploader?.name || "Anonymous"}**`, inline: true })
+    .addFields({
+      name: `Uploader:`,
+      value: nowTrack.uploader?.url
+        ? `**[${nowTrack.uploader.name || "Anonymous"}](${nowTrack.uploader.url})**`
+        : `**${nowTrack.uploader?.name || "Anonymous"}**`,
+      inline: true,
+    })
     .addFields({ name: `Requester:`, value: `${nowTrack.user}`, inline: true })
     .addFields({ name: `Current Volume:`, value: `${nowQueue.volume}%`, inline: true })
-    .addFields({ name: `Filters:`, value: `${nowQueue.filters.names.join(", ") || "Normal"}`, inline: true })
-    .addFields({ name: `Autoplay:`, value: `${nowQueue.autoplay ? "Activated" : "Not Active"}`, inline: true })
+    .addFields({
+      name: `Filters:`,
+      value: `${nowQueue.filters.names.join(", ") || "Normal"}`,
+      inline: true,
+    })
+    .addFields({
+      name: `Autoplay:`,
+      value: `${nowQueue.autoplay ? "Activated" : "Not Active"}`,
+      inline: true,
+    })
     .addFields({ name: `Total Duration:`, value: `${nowQueue.formattedDuration}`, inline: true })
-    .addFields({ name: `Current Duration: \`[0:00 / ${nowTrack.formattedDuration}]\``, value:`\`\`\`🔴 | 🎶──────────────────────────────\`\`\``, inline: false })
-    .setTimestamp()
+    .addFields({
+      name: `Current Duration: \`[0:00 / ${nowTrack.formattedDuration}]\``,
+      value: `\`\`\`🔴 | 🎶──────────────────────────────\`\`\``,
+      inline: false,
+    })
+    .setTimestamp();
 
   const row = new ActionRowBuilder()
     .addComponents(
@@ -221,76 +257,76 @@ function disspace(nowQueue, nowTrack, client) {
         .setCustomId("pause")
         .setLabel(`Pause`)
         .setEmoji("⏯")
-        .setStyle(ButtonStyle.Success)
+        .setStyle(ButtonStyle.Success),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("previous")
         .setLabel(`Previous`)
         .setEmoji("⬅")
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Primary),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("stop")
         .setLabel(`Stop`)
         .setEmoji("✖")
-        .setStyle(ButtonStyle.Danger)
+        .setStyle(ButtonStyle.Danger),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("skip")
         .setLabel(`Skip`)
         .setEmoji("➡")
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Primary),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("loop")
         .setLabel(`Loop`)
         .setEmoji("🔄")
-        .setStyle(ButtonStyle.Success)
-    )
+        .setStyle(ButtonStyle.Success),
+    );
 
-    const row2 = new ActionRowBuilder()
+  const row2 = new ActionRowBuilder()
     .addComponents(
       new ButtonBuilder()
         .setCustomId("shuffle")
         .setLabel(`Shuffle`)
         .setEmoji(`🔀`)
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Primary),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("voldown")
         .setLabel(`Vol -`)
         .setEmoji(`🔉`)
-        .setStyle(ButtonStyle.Success)
+        .setStyle(ButtonStyle.Success),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("clear")
         .setLabel(`Clear`)
         .setEmoji(`🗑`)
-        .setStyle(ButtonStyle.Secondary)
+        .setStyle(ButtonStyle.Secondary),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("volup")
         .setLabel(`Vol +`)
         .setEmoji(`🔊`)
-        .setStyle(ButtonStyle.Success)
+        .setStyle(ButtonStyle.Success),
     )
     .addComponents(
       new ButtonBuilder()
         .setCustomId("queue")
         .setLabel(`Queue`)
         .setEmoji(`📋`)
-        .setStyle(ButtonStyle.Primary)
-    )
+        .setStyle(ButtonStyle.Primary),
+    );
 
   return {
     embeds: [embed],
-    components: [row, row2]
-  }
+    components: [row, row2],
+  };
 }

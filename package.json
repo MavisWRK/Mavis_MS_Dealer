@@ -4,7 +4,9 @@
   "description": "Discord music bot maintained by MavisWRK",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "format": "prettier --write \"{commands,events,handlers,structures}/**/*.js\" \"*.js\" package.json .prettierrc.json",
+    "format:check": "prettier --check \"{commands,events,handlers,structures}/**/*.js\" \"*.js\" package.json .prettierrc.json"
   },
   "author": "MavisWRK (based on DisSpaceX by Adivise)",
   "license": "MIT",
@@ -34,5 +36,8 @@
     "opusscript": "^0.0.8",
     "recursive-readdir": "^2.2.3",
     "st.db": "^5.1.4"
+  },
+  "devDependencies": {
+    "prettier": "^3.10.1"
   }
 }

@@ -3,3 +3,4 @@ node_modules/
 ffmpeg.exe
 *-player-script.js
 npm-debug.log*
+logs/

@@ -1,0 +1,6 @@
+node_modules/
+operation_teste_corrupted_29-10-2026/
+settings/models/
+*-player-script.js
+ffmpeg.exe
+package-lock.json
