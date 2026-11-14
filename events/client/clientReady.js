@@ -1,4 +1,5 @@
 const { white, green } = require("chalk");
+const { ActivityType } = require("discord.js");
 
 module.exports = async (client) => {
   console.log(
@@ -9,22 +10,8 @@ module.exports = async (client) => {
       white(` is Ready!`),
   );
 
-  let guilds = client.guilds.cache.size;
-  let users = client.users.cache.size;
-  let channels = client.channels.cache.size;
-
-  const activities = [
-    `/help | ${guilds} servers`,
-    `/play <search> | ${users} users`,
-    `/filter custom <args> | ${channels} channels`,
-  ];
-
-  setInterval(() => {
-    client.user.setPresence({
-      activities: [
-        { name: `${activities[Math.floor(Math.random() * activities.length)]}`, type: 2 },
-      ],
-      status: "online",
-    });
-  }, 15000);
+  client.user.setPresence({
+    activities: [{ name: "🎧 MVS Radio • /play", type: ActivityType.Listening }],
+    status: "online",
+  });
 };
