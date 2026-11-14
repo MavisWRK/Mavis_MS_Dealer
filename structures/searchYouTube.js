@@ -19,6 +19,9 @@ module.exports = async (query, { limit = 5 } = {}) => {
           entry.webpage_url ||
           (entry.id ? `https://www.youtube.com/watch?v=${entry.id}` : entry.url),
         author: entry.uploader || entry.channel || "Unknown",
+        thumbnail: /^[\w-]{11}$/.test(entry.id || "")
+          ? `https://i.ytimg.com/vi/${entry.id}/mqdefault.jpg`
+          : entry.thumbnail,
       })),
   };
 };

@@ -1,6 +1,7 @@
 const { InteractionType } = require("discord.js");
 const { Database } = require("st.db");
 const { red } = require("chalk");
+const searchAutocomplete = require("../../structures/searchAutocomplete");
 
 const BStats = new Database("./settings/models/stats.json", { databaseInObject: true });
 
@@ -12,9 +13,6 @@ module.exports = async (client, interaction) => {
   ) {
     if (!interaction.guild || interaction.user.bot) return;
 
-    await client.createExSetup(interaction);
-    await client.createExVoice(interaction);
-
     let subCommandName = "";
     try {
       subCommandName = interaction.options.getSubcommand();
@@ -25,16 +23,27 @@ module.exports = async (client, interaction) => {
     } catch {}
 
     if (interaction.type == InteractionType.ApplicationCommandAutocomplete) {
-      if (
-        interaction.commandName === "play" ||
-        subCommandName === "playskip" ||
-        subCommandName === "playtop"
-      ) {
+      if (interaction.commandName === "search") {
+        const query = interaction.options.getFocused();
+        const choices = await searchAutocomplete(query);
+        return interaction.respond(choices).catch((error) => {
+          if (error.code !== 10062)
+            console.warn(`[search] Autocomplete response failed: ${error.message}`);
+        });
+      }
+      if (subCommandName === "playskip" || subCommandName === "playtop") {
         const query = interaction.options.getString("search")?.trim();
         const choice = query ? [{ name: query.slice(0, 100), value: query.slice(0, 100) }] : [];
-        return interaction.respond(choice).catch(console.error);
+        return interaction.respond(choice).catch((error) => {
+          if (error.code !== 10062)
+            console.warn(`[music] Autocomplete response failed: ${error.message}`);
+        });
       }
+      return interaction.respond([]).catch(() => {});
     }
+
+    await client.createExSetup(interaction);
+    await client.createExVoice(interaction);
 
     const command = client.slash.find((command) => {
       switch (command.name.length) {

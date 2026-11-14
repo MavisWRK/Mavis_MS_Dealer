@@ -13,7 +13,7 @@
 ## 📑 Feature
 - [x] Music System
 - [x] Filters System
-- [x] AutoComplete (Play, PlaySkip, PlayTop)
+- [x] AutoComplete (Search, PlaySkip, PlayTop)
 - [x] Song Request Channel
 - [x] Context Message Menu
 - [x] Message Button
@@ -74,7 +74,8 @@ EMBED_COLOR=#000001
 - Loop (Right-Click & Apps > Context | Loop) 
 
 🎶 **Music Commands!** 
-- Play (/play [song/url])
+- Play by name or link (/play song:<name or url>)
+- Browse results by name (/search browser:<song or artist>)
 - Nowplaying (/music nowplaying)
 - Queue (/music queue [page])
 - Repeat (/music loop)

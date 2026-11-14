@@ -6,27 +6,27 @@ const GSetup = new Database("./settings/models/setup.json", { databaseInObject: 
 
 module.exports = {
   name: ["play"],
-  description: "Plays a song from the source.",
+  description: "Play a song by name or link.",
   category: "Music",
   options: [
     {
-      name: "search",
+      name: "song",
       type: ApplicationCommandOptionType.String,
-      description: "The song to play.",
+      description: "Song name or music link.",
       required: true,
-      autocomplete: true,
     },
   ],
   run: async (client, interaction) => {
     try {
-      if (interaction.options.getString("search")) {
+      const query = interaction.options.getString("song", true).trim();
+      if (!query) return interaction.reply("Type a song name or paste a link.");
+
+      if (query) {
         const db = await GSetup.get(interaction.guild.id);
         if (db.setup_enable === true)
           return interaction.reply("Command is disable already have song request channel!");
 
-        await interaction.reply(
-          `🔍 **Searching...** \`${interaction.options.getString("search")}\``,
-        );
+        await interaction.reply(`🎵 **Loading...** \`${query}\``);
 
         const message = await interaction.fetchReply();
         await client.createPlay(interaction, message.id);
@@ -49,15 +49,14 @@ module.exports = {
           );
 
         try {
-          const string = await resolvePlayQuery(interaction.options.getString("search"));
-
+          const url = await resolvePlayQuery(query);
           const options = {
             member: interaction.member,
             textChannel: interaction.channel,
             interaction,
           };
 
-          await client.distube.play(interaction.member.voice.channel, string, options);
+          await client.distube.play(interaction.member.voice.channel, url, options);
         } catch (e) {
           console.error("[play] Playback failed:", e);
           await interaction

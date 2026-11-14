@@ -5,121 +5,114 @@ const {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  escapeMarkdown,
 } = require("discord.js");
 const { Database } = require("st.db");
-const ytsr = require("../../structures/searchYouTube");
+const searchYouTube = require("../../structures/searchYouTube");
 
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 
 module.exports = {
   name: ["search"],
-  description: "Search song and play music.",
+  description: "Search YouTube and choose a song to play.",
   category: "Music",
   options: [
     {
-      name: "search",
+      name: "browser",
       type: ApplicationCommandOptionType.String,
-      description: "The song to play.",
+      description: "Type a song or artist name.",
       required: true,
+      autocomplete: true,
     },
   ],
   run: async (client, interaction) => {
-    const string = interaction.options.getString("search");
+    const query = (
+      interaction.options.getString("browser") ?? interaction.options.getString("search", true)
+    ).trim();
+    if (!query) return interaction.reply("Type a song or artist name to search.");
 
     const db = await GSetup.get(interaction.guild.id);
     if (db.setup_enable === true)
-      return interaction.reply("Command is disable already have song request channel!");
+      return interaction.reply("Command is disabled while the song request channel is active.");
 
-    await interaction.reply(`🔍 **Searching...** \`${string}\``);
+    const channel = interaction.member.voice.channel;
+    if (!channel) return interaction.reply("You need to be in a voice channel.");
+    const permissions = channel.permissionsFor(interaction.guild.members.me);
+    if (!permissions?.has(PermissionsBitField.Flags.Connect))
+      return interaction.reply(`I don't have permission to connect to ${channel.name}.`);
+    if (!permissions.has(PermissionsBitField.Flags.Speak))
+      return interaction.reply(`I don't have permission to speak in ${channel.name}.`);
 
-    const message = await interaction.fetchReply();
-    await client.createPlay(interaction, message.id);
+    await interaction.deferReply();
 
-    const { channel } = interaction.member.voice;
-    if (!channel) return interaction.editReply("You need to be in voice channel.");
-    if (
-      !channel.permissionsFor(interaction.guild.members.me).has(PermissionsBitField.Flags.Connect)
-    )
-      return interaction.editReply(
-        `I don't have perm \`CONNECT\` in ${channel.name} to join voice!`,
-      );
-    if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionsBitField.Flags.Speak))
-      return interaction.editReply(`I don't have perm \`SPEAK\` in ${channel.name} to join voice!`);
+    try {
+      const { items } = await searchYouTube(query, { limit: 5 });
+      if (!items.length) return interaction.editReply("No songs found. Try another search.");
 
-    const row = new ActionRowBuilder()
-      .addComponents(
-        new ButtonBuilder().setCustomId("one").setEmoji("1️⃣").setStyle(ButtonStyle.Secondary),
-      )
-      .addComponents(
-        new ButtonBuilder().setCustomId("two").setEmoji("2️⃣").setStyle(ButtonStyle.Secondary),
-      )
-      .addComponents(
-        new ButtonBuilder().setCustomId("three").setEmoji("3️⃣").setStyle(ButtonStyle.Secondary),
-      )
-      .addComponents(
-        new ButtonBuilder().setCustomId("four").setEmoji("4️⃣").setStyle(ButtonStyle.Secondary),
-      )
-      .addComponents(
-        new ButtonBuilder().setCustomId("five").setEmoji("5️⃣").setStyle(ButtonStyle.Secondary),
+      const row = new ActionRowBuilder().addComponents(
+        items.map((_, index) =>
+          new ButtonBuilder()
+            .setCustomId(`search:${index}`)
+            .setLabel(String(index + 1))
+            .setStyle(ButtonStyle.Secondary),
+        ),
       );
 
-    const options = {
-      member: interaction.member,
-      textChannel: interaction.channel,
-      interaction,
-    };
+      const embeds = items.map((item, index) => {
+        const embed = new EmbedBuilder()
+          .setTitle(`${index + 1}. ${item.name.slice(0, 240)}`)
+          .setURL(item.url)
+          .setColor(client.color)
+          .setDescription(`by ${escapeMarkdown(item.author.slice(0, 100))}`);
+        if (item.thumbnail) embed.setThumbnail(item.thumbnail);
+        return embed;
+      });
+      embeds[0].setFooter({ text: "Choose a number within 30 seconds" });
 
-    const res = await ytsr(string, { safeSearch: true, limit: 5 });
+      const message = await interaction.editReply({
+        content: null,
+        embeds,
+        components: [row],
+      });
+      const collector = message.createMessageComponentCollector({
+        filter: (button) => button.user.id === interaction.user.id,
+        time: 30_000,
+        max: 1,
+      });
 
-    let index = 1;
-    const result = res.items
-      .slice(0, 5)
-      .map((x) => `**(${index++}.) [${x.name}](${x.url})** Author: \`${x.author}\``)
-      .join("\n");
+      collector.on("collect", async (button) => {
+        await button.deferUpdate();
+        await interaction.editReply({ components: [] });
 
-    const embed = new EmbedBuilder()
-      .setAuthor({
-        name: `Song Selection...`,
-        iconURL: interaction.guild.iconURL({ dynamic: true }),
-      })
-      .setColor(client.color)
-      .setDescription(result)
-      .setFooter({ text: `Please response in 30s` });
+        const selected = Number(button.customId.split(":")[1]);
+        const song = items[selected];
+        const currentChannel = button.member.voice.channel;
+        if (!song || currentChannel?.id !== channel.id) {
+          await interaction.editReply("Join the same voice channel and search again.");
+          return;
+        }
 
-    await message.edit({ content: " ", embeds: [embed], components: [row] });
+        try {
+          await client.createPlay(interaction, message.id);
+          await client.distube.play(currentChannel, song.url, {
+            member: button.member,
+            textChannel: interaction.channel,
+            interaction,
+          });
+        } catch (error) {
+          console.error("[search] Playback failed:", error);
+          await interaction.editReply(
+            `Could not play this track: ${error.message || "unknown error"}`,
+          );
+        }
+      });
 
-    const collector = interaction.channel.createMessageComponentCollector({
-      filter: (m) => m.user.id === interaction.user.id,
-      time: 30000,
-      max: 1,
-    });
-
-    collector.on("collect", async (interaction) => {
-      const id = interaction.customId;
-      const loader = new EmbedBuilder().setDescription("**Loading please wait....**");
-
-      if (id === "one") {
-        await message.edit({ embeds: [loader], components: [] });
-        await client.distube.play(interaction.member.voice.channel, res.items[0].url, options);
-      } else if (id === "two") {
-        await message.edit({ embeds: [loader], components: [] });
-        await client.distube.play(interaction.member.voice.channel, res.items[1].url, options);
-      } else if (id === "three") {
-        await message.edit({ embeds: [loader], components: [] });
-        await client.distube.play(interaction.member.voice.channel, res.items[2].url, options);
-      } else if (id === "four") {
-        await message.edit({ embeds: [loader], components: [] });
-        await client.distube.play(interaction.member.voice.channel, res.items[3].url, options);
-      } else if (id === "five") {
-        await message.edit({ embeds: [loader], components: [] });
-        await client.distube.play(interaction.member.voice.channel, res.items[4].url, options);
-      }
-    });
-
-    collector.on("end", async (collected, reason) => {
-      if (reason === "time") {
-        message.edit({ content: `No Response`, embeds: [], components: [] });
-      }
-    });
+      collector.on("end", (_, reason) => {
+        if (reason === "time") void interaction.editReply({ components: [] }).catch(console.error);
+      });
+    } catch (error) {
+      console.error("[search] Failed:", error);
+      await interaction.editReply(`Search failed: ${error.message || "unknown error"}`);
+    }
   },
 };
