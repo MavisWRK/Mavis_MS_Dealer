@@ -1,4 +1,4 @@
-const { InteractionType } = require("discord.js");
+const { InteractionType, MessageFlags } = require("discord.js");
 const { Database } = require("st.db");
 const { red } = require("chalk");
 const searchAutocomplete = require("../../structures/searchAutocomplete");
@@ -70,15 +70,24 @@ module.exports = async (client, interaction) => {
           `[COMMAND] ${command.name.at(-1)} executed by ${interaction.user.tag} | [${client.user.tag}] in ${interaction.guild.name} (${interaction.guild.id}) | Total Used: ${count} times.`,
         );
       } catch (error) {
-        console.log(error);
-        if (interaction.replied || interaction.deferred)
-          await interaction
-            .followUp({ content: `Something went wrong!`, ephemeral: true })
-            .catch(console.error);
-        else
-          await interaction
-            .reply({ content: `Something went wrong!`, ephemeral: true })
-            .catch(console.error);
+        console.warn(`[command] ${interaction.commandName}: ${error.message || error}`);
+        if (error.code === 10062 || error.code === 40060) return;
+
+        try {
+          if (interaction.replied || interaction.deferred)
+            await interaction.followUp({
+              content: "Something went wrong!",
+              flags: MessageFlags.Ephemeral,
+            });
+          else
+            await interaction.reply({
+              content: "Something went wrong!",
+              flags: MessageFlags.Ephemeral,
+            });
+        } catch (replyError) {
+          if (replyError.code !== 10062 && replyError.code !== 40060)
+            console.warn(`[command] Could not report error: ${replyError.message}`);
+        }
       }
     }
   }

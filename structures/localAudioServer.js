@@ -24,6 +24,7 @@ function serve(request, response) {
 
   let activeChild;
   let cancelled = false;
+  let firstError;
   response.once("close", () => {
     if (activeChild && !activeChild.killed && activeChild.exitCode === null) {
       cancelled = true;
@@ -71,10 +72,24 @@ function serve(request, response) {
       source.children.delete(child);
       if (cancelled || response.destroyed) return;
       if (!started && !useEmbeddedClient) {
+        firstError = errorOutput;
         startAttempt(true);
         return;
       }
-      if (code !== 0) playbackLog("yt-dlp", `Streaming failed (${code}): ${errorOutput}`);
+      if (code !== 0) {
+        const lastError = (output) =>
+          output
+            .trim()
+            .split(/\r?\n/)
+            .reverse()
+            .find((line) => /^ERROR:|^WARNING:/i.test(line.trim())) ||
+          output.trim().split(/\r?\n/).at(-1) ||
+          "unknown error";
+        playbackLog(
+          "yt-dlp",
+          `Streaming failed (${code}): ${lastError(errorOutput)}${firstError ? `; first attempt: ${lastError(firstError)}` : ""}`,
+        );
+      }
       if (!started && !response.headersSent) response.writeHead(502);
       response.end();
     });

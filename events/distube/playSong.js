@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { Database } = require("st.db");
 const { setVoiceChannelStatus } = require("../../structures/voiceChannelStatus");
+const musicProgress = require("../../structures/musicProgress");
 
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 
@@ -244,11 +245,7 @@ function disspace(nowQueue, nowTrack, client) {
       inline: true,
     })
     .addFields({ name: `Total Duration:`, value: `${nowQueue.formattedDuration}`, inline: true })
-    .addFields({
-      name: `Current Duration: \`[0:00 / ${nowTrack.formattedDuration}]\``,
-      value: `\`\`\`🔴 | 🎶──────────────────────────────\`\`\``,
-      inline: false,
-    })
+    .addFields(musicProgress(nowTrack))
     .setTimestamp();
 
   const row = new ActionRowBuilder()
