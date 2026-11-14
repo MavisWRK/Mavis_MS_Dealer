@@ -37,7 +37,7 @@ Register slash commands after the first install or whenever command definitions 
 node deploySlash.js global
 ```
 
-Start the bot yourself with `npm start`. On Windows, `Start.bat` checks the prerequisites and restarts the bot five seconds after it exits. Run `Start.bat --check` to check prerequisites without connecting to Discord. Avoid running both startup methods at the same time, since that would start two bot instances.
+Start the bot yourself with `npm start`. On Windows, `Start.bat` checks the prerequisites and restarts the bot five seconds after it exits. Run `Start.bat --check` to check prerequisites without connecting to Discord. To start it without a Command Prompt window, use `wscript.exe StartHidden.vbs`; output is saved to `logs/startup.log`. If you have configured a Windows sign-in task, it can run this hidden launcher automatically. Avoid running another startup method while the task is active, since that would start two bot instances.
 
 ## Main commands
 
