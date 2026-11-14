@@ -1,10 +1,12 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { Database } = require("st.db");
+const { setVoiceChannelStatus } = require("../../structures/voiceChannelStatus");
 
 const GSetup = new Database("./settings/models/setup.json", { databaseInObject: true });
 
 module.exports = async (client, queue, track) => {
   console.log(`[music] Playing: ${track.name}`);
+  void setVoiceChannelStatus(client, queue, track);
 
   await client.UpdateQueueMsg(queue);
   await client.addChart(track.id);
