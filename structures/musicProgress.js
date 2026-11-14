@@ -4,22 +4,23 @@ module.exports = (song, currentTime = 0, formattedCurrentTime = "0:00", paused =
   const elapsed = Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0;
   const elapsedLabel = formattedCurrentTime || "0:00";
   const duration = Number(song.duration);
+  const controls = `↻  ◁  ${paused ? "▶" : "Ⅱ"}  ▷  ↺`;
 
   if (song.isLive || !Number.isFinite(duration) || duration <= 0) {
     return {
-      name: "🔴 Live stream",
-      value: `▶️ Playing • ${elapsedLabel}`,
+      name: "Player",
+      value: `${controls}\n\`${elapsedLabel}  ● LIVE\``,
       inline: false,
     };
   }
 
   const progress = Math.min(elapsed / duration, 1);
-  const filled = Math.round(progress * BAR_LENGTH);
-  const bar = `${"🟩".repeat(filled)}${"⬜".repeat(BAR_LENGTH - filled)}`;
+  const position = Math.round(progress * BAR_LENGTH);
+  const bar = `${"─".repeat(position)}●${"─".repeat(BAR_LENGTH - position)}`;
 
   return {
-    name: `${paused ? "⏸️ Paused" : "▶️ Progress"} • ${elapsedLabel} / ${song.formattedDuration}`,
-    value: `${bar}  **${Math.round(progress * 100)}%**`,
+    name: "Player",
+    value: `${controls}\n\`${elapsedLabel}  ${bar}  ${song.formattedDuration}\``,
     inline: false,
   };
 };
