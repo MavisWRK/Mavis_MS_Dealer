@@ -1,4 +1,5 @@
 const { ChannelType, PermissionsBitField, Routes } = require("discord.js");
+const { getVoiceStatusEmoji } = require("./voiceStatusEmoji");
 
 const activeChannels = new Map();
 const pendingUpdates = new Map();
@@ -31,9 +32,9 @@ function setVoiceChannelStatus(client, queue, song) {
   }
 
   const guildId = channel.guild.id;
-  const status = `🎵 ${song.name}`.slice(0, 500);
-
   return schedule(guildId, async () => {
+    const emoji = await getVoiceStatusEmoji(channel.guild);
+    const status = `${emoji} ${song.name}`.slice(0, 500);
     const previousChannelId = activeChannels.get(guildId);
     if (previousChannelId && previousChannelId !== channel.id) {
       await client.rest.put(Routes.channelVoiceStatus(previousChannelId), {

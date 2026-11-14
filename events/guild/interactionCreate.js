@@ -39,6 +39,21 @@ module.exports = async (client, interaction) => {
             console.warn(`[music] Autocomplete response failed: ${error.message}`);
         });
       }
+      if (interaction.commandName === "voiceemoji") {
+        const query = interaction.options.getFocused().toLowerCase().trim();
+        const choices = [{ name: "🎵 Default", value: "default" }];
+        const emojis = interaction.guild.emojis.cache
+          .filter((emoji) => emoji.available !== false && emoji.name?.toLowerCase().includes(query))
+          .first(24)
+          .map((emoji) => ({
+            name: `:${emoji.name}: (${emoji.animated ? "animated" : "server"})`.slice(0, 100),
+            value: emoji.id,
+          }));
+        return interaction.respond([...choices, ...emojis]).catch((error) => {
+          if (error.code !== 10062)
+            console.warn(`[music] Emoji autocomplete failed: ${error.message}`);
+        });
+      }
       return interaction.respond([]).catch(() => {});
     }
 
