@@ -28,7 +28,7 @@ if /I "%~1"=="--check" (
 node --disable-warning=DEP0040 index.js
 set "BOT_EXIT_CODE=%ERRORLEVEL%"
 echo [INFO] Bot exited with code %BOT_EXIT_CODE%. Restarting in 5 seconds...
-timeout /t 5 /nobreak >nul
+node -e "setTimeout(() => {}, 5000)"
 goto run
 
 :workdir_error
@@ -50,5 +50,6 @@ goto failed
 echo [ERROR] FFmpeg is missing. Place ffmpeg.exe here or add FFmpeg to PATH.
 goto failed
 :failed
+if defined MAVIS_HIDDEN_START exit /b 1
 pause
 exit /b 1
