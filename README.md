@@ -50,7 +50,7 @@ git clone https://github.com/MavisWRK/Mavis_MS_Dealer.git
 cd Mavis_MS_Dealer
 npm ci
 ```
-After installation finishes please drag **ffmpeg.exe** file into DisSpaceX folder and you can use `node .` to start the bot. or `Run Start.bat`
+Place **ffmpeg.exe** in the project directory or add FFmpeg to `PATH`. After configuring `.env`, run `Start.bat` on Windows. It checks the prerequisites and restarts the bot 5 seconds after it exits. Run `Start.bat --check` to check the installation without connecting the bot to Discord. Press Ctrl+C to stop the restart loop.
 
 ## 📚 Configuration
 
