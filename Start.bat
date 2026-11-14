@@ -25,7 +25,7 @@ if /I "%~1"=="--check" (
 )
 
 :run
-node index.js
+node --disable-warning=DEP0040 index.js
 set "BOT_EXIT_CODE=%ERRORLEVEL%"
 echo [INFO] Bot exited with code %BOT_EXIT_CODE%. Restarting in 5 seconds...
 timeout /t 5 /nobreak >nul

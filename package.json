@@ -4,7 +4,7 @@
   "description": "Discord music bot maintained by MavisWRK",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node --disable-warning=DEP0040 index.js",
     "format": "prettier --write \"{commands,events,handlers,structures}/**/*.js\" \"*.js\" package.json .prettierrc.json",
     "format:check": "prettier --check \"{commands,events,handlers,structures}/**/*.js\" \"*.js\" package.json .prettierrc.json"
   },
