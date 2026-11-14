@@ -4,12 +4,12 @@ module.exports = (song, currentTime = 0, formattedCurrentTime = "0:00", paused =
   const elapsed = Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0;
   const elapsedLabel = formattedCurrentTime || "0:00";
   const duration = Number(song.duration);
-  const controls = `↻  ◁  ${paused ? "▶" : "Ⅱ"}  ▷  ↺`;
+  const controls = `↻ ◁ ${paused ? "▶" : "Ⅱ"} ▷ ↺`;
 
   if (song.isLive || !Number.isFinite(duration) || duration <= 0) {
     return {
       name: "Player",
-      value: `${controls}\n\`${elapsedLabel}  ● LIVE\``,
+      value: `\`${controls}  ${elapsedLabel} ● LIVE\``,
       inline: false,
     };
   }
@@ -20,7 +20,7 @@ module.exports = (song, currentTime = 0, formattedCurrentTime = "0:00", paused =
 
   return {
     name: "Player",
-    value: `${controls}\n\`${elapsedLabel}  ${bar}  ${song.formattedDuration}\``,
+    value: `\`${controls}  ${elapsedLabel} ${bar} ${song.formattedDuration}\``,
     inline: false,
   };
 };
