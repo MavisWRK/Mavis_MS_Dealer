@@ -2,6 +2,7 @@ const chillout = require("chillout");
 const readdirRecursive = require("recursive-readdir");
 const { resolve, relative } = require("path");
 const { green, white } = require("chalk");
+const { isCommandAvailable } = require("../structures/qobuzFeature");
 
 module.exports = async (client) => {
   let interactionsPath = resolve("./commands");
@@ -12,6 +13,7 @@ module.exports = async (client) => {
     const rltPath = relative(__dirname, interactionFile);
     //   console.log(`[INFO] Loading interaction at.. "${interactionFile}"`)
     const command = require(interactionFile);
+    if (!isCommandAvailable(command, client.config)) return;
 
     if (command.name.length > 3) {
       console.log(

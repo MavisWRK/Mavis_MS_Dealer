@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node --disable-warning=DEP0040 index.js",
-    "format": "prettier --write \"{commands,events,handlers,structures}/**/*.js\" \"*.js\" package.json .prettierrc.json",
-    "format:check": "prettier --check \"{commands,events,handlers,structures}/**/*.js\" \"*.js\" package.json .prettierrc.json"
+    "format": "prettier --write \"{commands,events,handlers,structures,settings,tests}/**/*.js\" \"*.js\" package.json .prettierrc.json",
+    "format:check": "prettier --check \"{commands,events,handlers,structures,settings,tests}/**/*.js\" \"*.js\" package.json .prettierrc.json",
+    "test:qobuz": "node --test tests/qobuz.test.js"
   },
   "author": "MavisWRK (based on DisSpaceX by Adivise)",
   "license": "MIT",

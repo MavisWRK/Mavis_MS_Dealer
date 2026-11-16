@@ -64,6 +64,14 @@ Use `/voiceemoji` to select one of the current server's custom emojis, including
 
 Changing this setting requires the **Manage Server** permission. The JSON files in `settings/models/` are local runtime data and are excluded from Git; back them up if you move the bot to another machine.
 
+### Qobuz (prepared, disabled)
+
+The project contains a draft `/qobuz song:<track link or name>` flow for playing audio from Qobuz itself. It is **not available yet**: `QOBUZ_ENABLED=false` by default, so the command is neither loaded by the bot nor registered by `deploySlash.js`. Existing music playback is unaffected.
+
+An authorized Qobuz provider must implement `getTrack`, `searchTrack`, and `getStreamUrl` in `structures/qobuzProvider.js`. The stream URL is requested when a track starts playing, so the integration does not need to download the entire track first. Qobuz API access and permission for playback in a shared voice channel must be confirmed before implementing that provider. Setting `QOBUZ_ENABLED=true` alone does not activate the command while `provider.available` remains `false`.
+
+Once access is granted and the provider is implemented, enable the flag in `.env`, register commands with `node deploySlash.js global`, and restart your own bot instance. Do not put account passwords or API secrets in the repository.
+
 ## Supported sources
 
 The bot includes plugins for YouTube, SoundCloud, Spotify, Deezer, Apple Music, Tidal, direct audio links, and other sites handled by yt-dlp. Source availability depends on the provider and may change over time.

@@ -4,7 +4,9 @@ const chillout = require("chillout");
 const { makeSureFolderExists } = require("stuffs");
 const path = require("path");
 const readdirRecursive = require("recursive-readdir");
-const { TOKEN } = require("./settings/config.js");
+const config = require("./settings/config.js");
+const { TOKEN } = config;
+const { isCommandAvailable } = require("./structures/qobuzFeature");
 const {
   ApplicationCommandOptionType,
   REST,
@@ -47,6 +49,7 @@ const {
 
     await chillout.forEach(interactionFilePaths, (interactionFilePath) => {
       const cmd = require(interactionFilePath);
+      if (!isCommandAvailable(cmd, config)) return;
       console.log(
         `Interaction "${cmd.type == "CHAT_INPUT" ? `/${cmd.name.join(" ")}` : `${cmd.name[0]}`}" ${cmd.name[1] || ""} ${cmd.name[2] || ""} added to the transform list!`,
       );

@@ -8,6 +8,9 @@ const { DirectLinkPlugin } = require("@distube/direct-link");
 const ModernYtDlpPlugin = require("./structures/ModernYtDlpPlugin");
 const { AppleMusicPlugin } = require("distube-apple-music");
 const { TidalPlugin } = require("distube-tidal");
+const { QobuzPlugin } = require("./structures/QobuzPlugin");
+const qobuzProvider = require("./structures/qobuzProvider");
+const { isQobuzAvailable } = require("./structures/qobuzFeature");
 
 class MainClient extends Client {
   constructor() {
@@ -35,11 +38,16 @@ class MainClient extends Client {
     const client = this;
 
     const ytDlpPlugin = new ModernYtDlpPlugin();
+    this.qobuzPlugin = isQobuzAvailable(this.config) ? new QobuzPlugin(qobuzProvider) : null;
+    if (this.config.QOBUZ_ENABLED && !this.qobuzPlugin) {
+      console.warn("[qobuz] Streaming is disabled until an authorized provider is configured.");
+    }
     this.distube = new DisTube(client, {
       savePreviousSongs: true,
       emitAddListWhenCreatingQueue: true,
       emitAddSongWhenCreatingQueue: true,
       plugins: [
+        ...(this.qobuzPlugin ? [this.qobuzPlugin] : []),
         new TidalPlugin(),
         new AppleMusicPlugin(),
         new DirectLinkPlugin(),

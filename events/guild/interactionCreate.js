@@ -2,6 +2,7 @@ const { InteractionType, MessageFlags } = require("discord.js");
 const { Database } = require("st.db");
 const { red } = require("chalk");
 const searchAutocomplete = require("../../structures/searchAutocomplete");
+const { isQobuzAvailable } = require("../../structures/qobuzFeature");
 
 const BStats = new Database("./settings/models/stats.json", { databaseInObject: true });
 
@@ -55,6 +56,13 @@ module.exports = async (client, interaction) => {
         });
       }
       return interaction.respond([]).catch(() => {});
+    }
+
+    if (interaction.commandName === "qobuz" && !isQobuzAvailable(client.config)) {
+      return interaction.reply({
+        content: "Qobuz playback is not available yet.",
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     await client.createExSetup(interaction);
