@@ -9,6 +9,8 @@ const { TOKEN } = config;
 const { isCommandAvailable } = require("./structures/qobuzFeature");
 const {
   ApplicationCommandOptionType,
+  ApplicationIntegrationType,
+  InteractionContextType,
   REST,
   Routes,
   ApplicationCommandManager,
@@ -66,11 +68,26 @@ const {
             name: current.name[0],
             description: current.description,
             defaultPermission: current.defaultPermission,
+            integrationTypes: current.integrationTypes,
+            contexts: current.contexts,
             options: current.options,
           });
           break;
         }
         case 2: {
+          const musicContexts =
+            current.name[0] === "music"
+              ? {
+                  integrationTypes: [
+                    ApplicationIntegrationType.GuildInstall,
+                    ApplicationIntegrationType.UserInstall,
+                  ],
+                  contexts: [InteractionContextType.Guild],
+                }
+              : {
+                  integrationTypes: current.integrationTypes,
+                  contexts: current.contexts,
+                };
           let baseItem = all.find((i) => {
             return i.name == current.name[0] && i.type == current.type;
           });
@@ -80,6 +97,7 @@ const {
               name: current.name[0],
               description: `${current.name[0]} commands.`,
               defaultPermission: current.defaultPermission,
+              ...musicContexts,
               options: [
                 {
                   type: ApplicationCommandOptionType.Subcommand,

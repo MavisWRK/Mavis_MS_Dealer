@@ -1,4 +1,9 @@
-const { PermissionsBitField, ApplicationCommandOptionType } = require("discord.js");
+const {
+  PermissionsBitField,
+  ApplicationCommandOptionType,
+  ApplicationIntegrationType,
+  InteractionContextType,
+} = require("discord.js");
 const { Database } = require("st.db");
 const resolvePlayQuery = require("../../structures/resolvePlayQuery");
 
@@ -8,6 +13,11 @@ module.exports = {
   name: ["play"],
   description: "Play a song by name or link.",
   category: "Music",
+  integrationTypes: [
+    ApplicationIntegrationType.GuildInstall,
+    ApplicationIntegrationType.UserInstall,
+  ],
+  contexts: [InteractionContextType.Guild],
   options: [
     {
       name: "song",

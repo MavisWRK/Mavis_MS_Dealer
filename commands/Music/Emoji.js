@@ -1,4 +1,10 @@
-const { ApplicationCommandOptionType, MessageFlags, PermissionFlagsBits } = require("discord.js");
+const {
+  ApplicationCommandOptionType,
+  ApplicationIntegrationType,
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+} = require("discord.js");
 const { setVoiceStatusEmoji } = require("../../structures/voiceStatusEmoji");
 const { setVoiceChannelStatus } = require("../../structures/voiceChannelStatus");
 
@@ -6,6 +12,11 @@ module.exports = {
   name: ["voiceemoji"],
   description: "Choose the emoji shown in the voice channel status.",
   category: "Music",
+  integrationTypes: [
+    ApplicationIntegrationType.GuildInstall,
+    ApplicationIntegrationType.UserInstall,
+  ],
+  contexts: [InteractionContextType.Guild],
   options: [
     {
       name: "emoji",

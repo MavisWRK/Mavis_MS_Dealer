@@ -6,6 +6,8 @@ const {
   ButtonStyle,
   EmbedBuilder,
   escapeMarkdown,
+  ApplicationIntegrationType,
+  InteractionContextType,
 } = require("discord.js");
 const { Database } = require("st.db");
 const searchYouTube = require("../../structures/searchYouTube");
@@ -16,6 +18,11 @@ module.exports = {
   name: ["search"],
   description: "Search YouTube and choose a song to play.",
   category: "Music",
+  integrationTypes: [
+    ApplicationIntegrationType.GuildInstall,
+    ApplicationIntegrationType.UserInstall,
+  ],
+  contexts: [InteractionContextType.Guild],
   options: [
     {
       name: "browser",

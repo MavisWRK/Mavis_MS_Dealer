@@ -65,6 +65,13 @@ module.exports = async (client, interaction) => {
       });
     }
 
+    if (!interaction.guild.members.me) {
+      return interaction.reply({
+        content: "Add the bot to this server before using its voice commands.",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     await client.createExSetup(interaction);
     await client.createExVoice(interaction);
 
